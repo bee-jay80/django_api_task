@@ -1,0 +1,2045 @@
+<!DOCTYPE>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django User Authentication System - Task Documentation</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%23667eea' width='100' height='100'/><path d='M50 20 C60 20 65 25 65 35 L65 45 C72 45 75 48 75 55 L75 80 C75 85 72 88 65 88 L35 88 C28 88 25 85 25 80 L25 55 C25 48 28 45 35 45 L35 35 C35 25 40 20 50 20 M50 30 C43 30 40 33 40 40 L40 45 L60 45 L60 40 C60 33 57 30 50 30 M50 60 C54 60 57 63 57 67 C57 71 54 74 50 74 C46 74 43 71 43 67 C43 63 46 60 50 60' fill='white'/></svg>" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .nav-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-tabs button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-tabs button:hover {
+            background: #e9ecef;
+            color: #667eea;
+        }
+
+        .nav-tabs button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: white;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+
+        h4 {
+            color: #555;
+            margin-top: 15px;
+            margin-bottom: 10px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .grading-criteria {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .criteria-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .criteria-card h4 {
+            color: white;
+            margin-top: 0;
+        }
+
+        .criteria-card .points {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .endpoint-header {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .method.post {
+            background: #28a745;
+            color: white;
+        }
+
+        .method.get {
+            background: #007bff;
+            color: white;
+        }
+
+        .method.put {
+            background: #ffc107;
+            color: black;
+        }
+
+        .method.delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .url {
+            background: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .auth-required {
+            display: inline-block;
+            padding: 5px 10px;
+            background: #ff6b6b;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: auto;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .code-label {
+            color: #667eea;
+            font-weight: bold;
+            margin-top: 15px;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .response-success {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .response-error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .status-code {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .status-200 {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-201 {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-400 {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-401 {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-404 {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-500 {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .step-box {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .model-field {
+            background: white;
+            border-left: 4px solid #764ba2;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 2px;
+        }
+
+        .field-name {
+            color: #764ba2;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .field-type {
+            color: #666;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+
+        .note {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            color: #01579b;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            color: #856404;
+        }
+
+        .success-msg {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+            color: #155724;
+        }
+
+        .flow-diagram {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .flow-step {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 20px;
+            margin: 10px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .flow-arrow {
+            display: inline-block;
+            margin: 0 10px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .highlight {
+            background: #fff9e6;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: #ff6b6b;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .nav-tabs {
+                overflow-x: auto;
+            }
+
+            .nav-tabs button {
+                min-width: 150px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .endpoint-header {
+                flex-direction: column;
+            }
+
+            .auth-required {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+
+            .grading-criteria {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔐 Django User Authentication System</h1>
+            <p>Complete Task Documentation with API Endpoints, Examples & Implementation Guide</p>
+        </header>
+
+        <div class="nav-tabs">
+            <button class="tab-button active" onclick="switchTab(event, 'overview')">Overview</button>
+            <button class="tab-button" onclick="switchTab(event, 'requirements')">Requirements</button>
+            <button class="tab-button" onclick="switchTab(event, 'database')">Database Model</button>
+            <button class="tab-button" onclick="switchTab(event, 'api')">API Endpoints</button>
+            <!-- <button class="tab-button" onclick="switchTab(event, 'implementation')">Implementation</button> -->
+            <button class="tab-button" onclick="switchTab(event, 'grading')">Grading</button>
+        </div>
+
+        <div class="content">
+            <!-- OVERVIEW TAB -->
+            <div id="overview" class="tab-content active">
+                <h2>📋 Project Overview</h2>
+                
+                <div class="section">
+                    <h3>What is This Project?</h3>
+                    <p>
+                        This is a comprehensive Django REST Framework authentication system that demonstrates advanced user management 
+                        and security practices. The project involves building a custom user model by extending Django's 
+                        <span class="highlight">AbstractBaseUser</span> class with additional fields and implementing JWT-based token 
+                        authentication for secure API access.
+                    </p>
+                </div>
+
+                <div class="section">
+                    <h3>Project Objectives</h3>
+                    <ul class="feature-list">
+                        <li>Extend Django's AbstractBaseUser with custom user fields</li>
+                        <li>Implement email-based authentication (email as username)</li>
+                        <li>Implement JWT token-based authentication (access & refresh tokens)</li>
+                        <li>Create serializers with password field handling</li>
+                        <li>Build protected endpoints for authenticated users only</li>
+                        <li>Implement dynamic response payloads with user data</li>
+                        <li>Handle authorization and permission checks</li>
+                        <li>Follow RESTful API best practices</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3>Key Features</h3>
+                    <ul class="feature-list">
+                        <li><strong>User Registration:</strong> Create new user accounts with validation</li>
+                        <li><strong>User Login:</strong> Authenticate using email and password, receive JWT tokens</li>
+                        <li><strong>Protected Routes:</strong> Access control for authenticated users only</li>
+                        <li><strong>Token Refresh:</strong> Extend session by refreshing access tokens</li>
+                        <li><strong>User Profile:</strong> Retrieve authenticated user's complete information</li>
+                        <li><strong>Age Verification:</strong> Business logic to check age eligibility (18+)</li>
+                        <li><strong>Error Handling:</strong> Comprehensive error messages and validation</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3>Technology Stack</h3>
+                    <table>
+                        <tr>
+                            <th>Component</th>
+                            <th>Technology</th>
+                            <th>Purpose</th>
+                        </tr>
+                        <tr>
+                            <td>Backend Framework</td>
+                            <td>Django 3.2+</td>
+                            <td>Web application framework</td>
+                        </tr>
+                        <tr>
+                            <td>API</td>
+                            <td>Django REST Framework</td>
+                            <td>Building RESTful APIs</td>
+                        </tr>
+                        <tr>
+                            <td>Authentication</td>
+                            <td>Simple JWT (djangorestframework-simplejwt)</td>
+                            <td>Token-based authentication</td>
+                        </tr>
+                        <tr>
+                            <td>Database</td>
+                            <td>PostgreSQL / SQLite</td>
+                            <td>Data persistence</td>
+                        </tr>
+                        <tr>
+                            <td>Serialization</td>
+                            <td>DRF Serializers</td>
+                            <td>Data validation and conversion</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h3>User Flow Diagram</h3>
+                    <div class="flow-diagram">
+                        <div class="flow-step">User Registration</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Validation</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">User Created</div>
+                        <br><br>
+                        <div class="flow-step">User Login</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Verify Credentials</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Generate Tokens</div>
+                        <br><br>
+                        <div class="flow-step">Access Protected Route</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Verify Token</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Retrieve User Data</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REQUIREMENTS TAB -->
+            <div id="requirements" class="tab-content">
+                <h2>✅ Project Requirements</h2>
+
+                <div class="section">
+                    <h3>Custom User Model Fields</h3>
+                    <p>The custom user model must include the following fields:</p>
+                    
+                    <div class="model-field">
+                        <span class="field-name">email</span>
+                        <span class="field-type">EmailField, unique=True</span>
+                        <p style="margin-top: 5px; font-size: 0.9em;">Primary login credential, must be unique across the system</p>
+                    </div>
+
+                    <div class="model-field">
+                        <span class="field-name">username</span>
+                        <span class="field-type">CharField (optional or derived from email)</span>
+                        <p style="margin-top: 5px; font-size: 0.9em;">Can be the same as email or a separate field</p>
+                    </div>
+
+                    <div class="model-field">
+                        <span class="field-name">first_name</span>
+                        <span class="field-type">CharField, max_length=50</span>
+                        <p style="margin-top: 5px; font-size: 0.9em;">User's first name</p>
+                    </div>
+
+                    <div class="model-field">
+                        <span class="field-name">last_name</span>
+                        <span class="field-type">CharField, max_length=50</span>
+                        <p style="margin-top: 5px; font-size: 0.9em;">User's last name</p>
+                    </div>
+
+                    <div class="model-field">
+                        <span class="field-name">age</span>
+                        <span class="field-type">IntegerField</span>
+                        <p style="margin-top: 5px; font-size: 0.9em;">User's age (used for eligibility checks)</p>
+                    </div>
+
+                    <div class="model-field">
+                        <span class="field-name">gender</span>
+                        <span class="field-type">CharField, choices=[Male, Female, Other]</span>
+                        <p style="margin-top: 5px; font-size: 0.9em;">User's gender specification</p>
+                    </div>
+
+                    <div class="model-field">
+                        <span class="field-name">phone_number</span>
+                        <span class="field-type">CharField, max_length=15</span>
+                        <p style="margin-top: 5px; font-size: 0.9em;">Contact phone number</p>
+                    </div>
+
+                    <div class="model-field">
+                        <span class="field-name">address</span>
+                        <span class="field-type">TextField</span>
+                        <p style="margin-top: 5px; font-size: 0.9em;">User's residential address</p>
+                    </div>
+
+                    <div class="model-field">
+                        <span class="field-name">marital_status</span>
+                        <span class="field-type">CharField, choices=[Single, Married, Divorced, Widowed]</span>
+                        <p style="margin-top: 5px; font-size: 0.9em;">User's marital status</p>
+                    </div>
+
+                    <div class="model-field">
+                        <span class="field-name">password</span>
+                        <span class="field-type">Handled by AbstractBaseUser</span>
+                        <p style="margin-top: 5px; font-size: 0.9em;">Inherits secure password storage from AbstractBaseUser</p>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>User Model Configuration</h3>
+                    <div class="note">
+                        <strong>⚠️ Important:</strong> The <span class="highlight">email</span> field should be set as the 
+                        <span class="highlight">USERNAME_FIELD</span> in your custom User model. This means users will log in using 
+                        their email address instead of a traditional username.
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Serializer Requirements</h3>
+                    <ul class="feature-list">
+                        <li>Create a UserSerializer for reading user data</li>
+                        <li>Create a UserRegistrationSerializer for handling user registration</li>
+                        <li>Create a UserLoginSerializer for handling login with email and password</li>
+                        <li>Password field must be write-only (not returned in responses)</li>
+                        <li>Implement password validation and hashing</li>
+                        <li>Include appropriate error messages for validation failures</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3>API Endpoints Required</h3>
+                    <ul class="feature-list">
+                        <li><strong>POST /api/auth/register/</strong> - Register new user</li>
+                        <li><strong>POST /api/auth/login/</strong> - User login (returns tokens)</li>
+                        <li><strong>POST /api/auth/refresh/</strong> - Refresh access token</li>
+                        <li><strong>GET /api/auth/profile/</strong> - Get authenticated user's profile (protected)</li>
+                        <li><strong>GET /api/auth/greeting/</strong> - Get personalized greeting (protected)</li>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3>Authentication & Authorization</h3>
+                    <div class="note">
+                        <strong>🔐 JWT Token Authentication:</strong>
+                        <ul style="margin-top: 10px;">
+                            <li>Use <span class="highlight">SimpleJWT</span> from djangorestframework-simplejwt</li>
+                            <li>Every protected endpoint must verify the JWT token in the Authorization header</li>
+                            <li>Token format: <span class="highlight">Authorization: Bearer &lt;access_token&gt;</span></li>
+                            <li>Access tokens should expire after a set time (typically 15 minutes)</li>
+                            <li>Refresh tokens can be used to obtain new access tokens</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Business Logic Requirements</h3>
+                    <ul class="feature-list">
+                        <li>Users must be at least 18 years old to access certain endpoints</li>
+                        <li>Implement appropriate error handling and validation</li>
+                        <li>Return meaningful error messages with proper HTTP status codes</li>
+                        <li>Ensure data validation at serializer level</li>
+                        <li>Implement proper permission classes for protected routes</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- DATABASE MODEL TAB -->
+            <div id="database" class="tab-content">
+                <h2>🗄️ Database Model Structure</h2>
+
+                <div class="section">
+                    <h3>Custom User Model Implementation</h3>
+                    <p>The User model extends Django's AbstractBaseUser and BaseUserManager:</p>
+
+                    <div class="code-label">models.py - Custom User Model</div>
+                    <div class="code-block">
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.db import models
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password, **extra_fields):
+        if not email:
+            raise ValueError('Email must be provided')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+    
+    def create_superuser(self, email, password, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+    ]
+    
+    MARITAL_CHOICES = [
+        ('S', 'Single'),
+        ('M', 'Married'),
+        ('D', 'Divorced'),
+        ('W', 'Widowed'),
+    ]
+    
+    email = models.EmailField(unique=True)
+    username = models.CharField(max_length=100, unique=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    age = models.IntegerField()
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    phone_number = models.CharField(max_length=15)
+    address = models.TextField()
+    marital_status = models.CharField(max_length=1, choices=MARITAL_CHOICES)
+    
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    
+    date_joined = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    objects = CustomUserManager()
+    
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    
+    class Meta:
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
+        db_table = 'custom_user'
+    
+    def __str__(self):
+        return self.email
+    
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Model Field Details</h3>
+                    <table>
+                        <tr>
+                            <th>Field Name</th>
+                            <th>Type</th>
+                            <th>Constraints</th>
+                            <th>Description</th>
+                        </tr>
+                        <tr>
+                            <td>email</td>
+                            <td>EmailField</td>
+                            <td>unique=True, required</td>
+                            <td>Primary identifier & login credential</td>
+                        </tr>
+                        <tr>
+                            <td>username</td>
+                            <td>CharField(100)</td>
+                            <td>unique=True, required</td>
+                            <td>Unique username display name</td>
+                        </tr>
+                        <tr>
+                            <td>first_name</td>
+                            <td>CharField(50)</td>
+                            <td>required</td>
+                            <td>User's first name</td>
+                        </tr>
+                        <tr>
+                            <td>last_name</td>
+                            <td>CharField(50)</td>
+                            <td>required</td>
+                            <td>User's last name</td>
+                        </tr>
+                        <tr>
+                            <td>age</td>
+                            <td>IntegerField</td>
+                            <td>required</td>
+                            <td>Age in years (for eligibility checks)</td>
+                        </tr>
+                        <tr>
+                            <td>gender</td>
+                            <td>CharField(1)</td>
+                            <td>choices, required</td>
+                            <td>M=Male, F=Female, O=Other</td>
+                        </tr>
+                        <tr>
+                            <td>phone_number</td>
+                            <td>CharField(15)</td>
+                            <td>required</td>
+                            <td>Contact phone number</td>
+                        </tr>
+                        <tr>
+                            <td>address</td>
+                            <td>TextField</td>
+                            <td>required</td>
+                            <td>Residential address</td>
+                        </tr>
+                        <tr>
+                            <td>marital_status</td>
+                            <td>CharField(1)</td>
+                            <td>choices, required</td>
+                            <td>S=Single, M=Married, D=Divorced, W=Widowed</td>
+                        </tr>
+                        <tr>
+                            <td>password</td>
+                            <td>CharField (inherited)</td>
+                            <td>required, hashed</td>
+                            <td>Securely stored password hash</td>
+                        </tr>
+                        <tr>
+                            <td>is_active</td>
+                            <td>BooleanField</td>
+                            <td>default=True</td>
+                            <td>User account active status</td>
+                        </tr>
+                        <tr>
+                            <td>is_staff</td>
+                            <td>BooleanField</td>
+                            <td>default=False</td>
+                            <td>Staff/admin access flag</td>
+                        </tr>
+                        <tr>
+                            <td>date_joined</td>
+                            <td>DateTimeField</td>
+                            <td>auto_now_add=True</td>
+                            <td>Account creation timestamp</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="section">
+                    <h3>Database Settings Configuration</h3>
+                    <div class="code-label">settings.py</div>
+                    <div class="code-block">
+# Django settings configuration
+
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'your_app_name',
+]
+
+# Custom User Model
+AUTH_USER_MODEL = 'your_app_name.CustomUser'
+
+# REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+# Simple JWT Configuration
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+}
+                    </div>
+                </div>
+            </div>
+
+            <!-- API ENDPOINTS TAB -->
+            <div id="api" class="tab-content">
+                <h2>🔌 API Endpoints Documentation</h2>
+
+                <div class="note">
+                    <strong>Base URL:</strong> http://localhost:8000/api/auth/
+                    <br>
+                    All responses are in JSON format (Content-Type: application/json)
+                </div>
+
+                <!-- ENDPOINT 1: REGISTER -->
+                <div class="section">
+                    <h3>1. User Registration</h3>
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span class="url">/api/auth/register/</span>
+                        </div>
+
+                        <h4>Description</h4>
+                        <p>Create a new user account with email, password, and personal information.</p>
+
+                        <h4>Request Parameters</h4>
+                        <table>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                            <tr>
+                                <td>email</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Valid email address, must be unique</td>
+                            </tr>
+                            <tr>
+                                <td>username</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Unique username (3-100 characters)</td>
+                            </tr>
+                            <tr>
+                                <td>password</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Strong password (min 8 characters, mix of upper/lower/digits)</td>
+                            </tr>
+                            <tr>
+                                <td>first_name</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>User's first name</td>
+                            </tr>
+                            <tr>
+                                <td>last_name</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>User's last name</td>
+                            </tr>
+                            <tr>
+                                <td>age</td>
+                                <td>integer</td>
+                                <td>Yes</td>
+                                <td>Age in years (must be 18 or older)</td>
+                            </tr>
+                            <tr>
+                                <td>gender</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>M (Male), F (Female), or O (Other)</td>
+                            </tr>
+                            <tr>
+                                <td>phone_number</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Valid phone number (format: +1234567890)</td>
+                            </tr>
+                            <tr>
+                                <td>address</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>Full residential address</td>
+                            </tr>
+                            <tr>
+                                <td>marital_status</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>S (Single), M (Married), D (Divorced), W (Widowed)</td>
+                            </tr>
+                        </table>
+
+                        <div class="code-label">Request Example</div>
+                        <div class="code-block">
+POST /api/auth/register/
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "username": "johndoe",
+  "password": "SecurePass123!",
+  "first_name": "John",
+  "last_name": "Doe",
+  "age": 25,
+  "gender": "M",
+  "phone_number": "+1-555-0100",
+  "address": "123 Main Street, New York, NY 10001",
+  "marital_status": "S"
+}
+                        </div>
+
+                        <div class="code-label">Success Response (201 Created)</div>
+                        <div class="response-success">
+                            <span class="status-code status-201">201</span>
+                            <strong>User successfully created</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "id": 1,
+  "email": "john.doe@example.com",
+  "username": "johndoe",
+  "first_name": "John",
+  "last_name": "Doe",
+  "age": 25,
+  "gender": "M",
+  "phone_number": "+1-555-0100",
+  "address": "123 Main Street, New York, NY 10001",
+  "marital_status": "S",
+  "message": "User registered successfully"
+}
+                        </div>
+
+                        <div class="code-label">Error Response (400 Bad Request)</div>
+                        <div class="response-error">
+                            <span class="status-code status-400">400</span>
+                            <strong>Validation Error</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "email": ["User with this email already exists"],
+  "age": ["User must be at least 18 years old"],
+  "password": ["Password must contain at least 8 characters"]
+}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ENDPOINT 2: LOGIN -->
+                <div class="section">
+                    <h3>2. User Login</h3>
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span class="url">/api/auth/login/</span>
+                        </div>
+
+                        <h4>Description</h4>
+                        <p>Authenticate user with email and password. Returns JWT access and refresh tokens for subsequent authenticated requests.</p>
+
+                        <h4>Request Parameters</h4>
+                        <table>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                            <tr>
+                                <td>email</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>User's registered email address</td>
+                            </tr>
+                            <tr>
+                                <td>password</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>User's password</td>
+                            </tr>
+                        </table>
+
+                        <div class="code-label">Request Example</div>
+                        <div class="code-block">
+POST /api/auth/login/
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "SecurePass123!"
+}
+                        </div>
+
+                        <div class="code-label">Success Response (200 OK)</div>
+                        <div class="response-success">
+                            <span class="status-code status-200">200</span>
+                            <strong>Login successful</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwiaWF0IjoxNjM5NjQ4MDAwLCJleHAiOjE2Mzk2NDg5MDB9.xy1234...",
+  "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwiaWF0IjoxNjM5NjQ4MDAwLCJleHAiOjE2Mzk3MzQ0MDB9.z1234...",
+  "user": {
+    "id": 1,
+    "email": "john.doe@example.com",
+    "first_name": "John",
+    "last_name": "Doe"
+  }
+}
+                        </div>
+
+                        <div class="code-label">Error Response - Invalid Credentials (401)</div>
+                        <div class="response-error">
+                            <span class="status-code status-401">401</span>
+                            <strong>Authentication Failed</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "detail": "Invalid email or password"
+}
+                        </div>
+
+                        <div class="code-label">Error Response - User Not Found (404)</div>
+                        <div class="response-error">
+                            <span class="status-code status-404">404</span>
+                            <strong>User Not Found</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "email": ["No user found with this email address"]
+}
+                        </div>
+
+                        <div class="note">
+                            <strong>Token Usage:</strong> The <span class="highlight">access</span> token is used for making authenticated requests. 
+                            Include it in the Authorization header: <span class="highlight">Authorization: Bearer &lt;access_token&gt;</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ENDPOINT 3: REFRESH TOKEN -->
+                <div class="section">
+                    <h3>3. Refresh Access Token</h3>
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span class="url">/api/auth/refresh/</span>
+                        </div>
+
+                        <h4>Description</h4>
+                        <p>Generate a new access token using the refresh token. Use this when your access token has expired.</p>
+
+                        <h4>Request Parameters</h4>
+                        <table>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Description</th>
+                            </tr>
+                            <tr>
+                                <td>refresh</td>
+                                <td>string</td>
+                                <td>Yes</td>
+                                <td>The refresh token received from login</td>
+                            </tr>
+                        </table>
+
+                        <div class="code-label">Request Example</div>
+                        <div class="code-block">
+POST /api/auth/refresh/
+Content-Type: application/json
+
+{
+  "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwiaWF0IjoxNjM5NjQ4MDAwLCJleHAiOjE2Mzk3MzQ0MDB9.z1234..."
+}
+                        </div>
+
+                        <div class="code-label">Success Response (200 OK)</div>
+                        <div class="response-success">
+                            <span class="status-code status-200">200</span>
+                            <strong>New access token generated</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwiaWF0IjoxNjM5NjQ4OTAwLCJleHAiOjE2Mzk2NDk4MDB9.new123..."
+}
+                        </div>
+
+                        <div class="code-label">Error Response - Invalid Refresh Token (401)</div>
+                        <div class="response-error">
+                            <span class="status-code status-401">401</span>
+                            <strong>Invalid or Expired Refresh Token</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "detail": "Token is invalid or expired"
+}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ENDPOINT 4: USER PROFILE -->
+                <div class="section">
+                    <h3>4. Get User Profile</h3>
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <span class="url">/api/auth/profile/</span>
+                            <span class="auth-required">🔐 REQUIRES AUTH</span>
+                        </div>
+
+                        <h4>Description</h4>
+                        <p>Retrieve the authenticated user's complete profile information. This endpoint is protected and requires a valid JWT access token.</p>
+
+                        <h4>Authentication Required</h4>
+                        <div class="warning">
+                            <strong>Authorization Header:</strong> 
+                            <div class="code-block" style="margin-top: 10px; background: #f8f9fa; color: #333; border: 1px solid #ffc107;">
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIn0.xy1234...
+                            </div>
+                        </div>
+
+                        <div class="code-label">Request Example</div>
+                        <div class="code-block">
+GET /api/auth/profile/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+                        </div>
+
+                        <div class="code-label">Success Response (200 OK)</div>
+                        <div class="response-success">
+                            <span class="status-code status-200">200</span>
+                            <strong>User profile retrieved successfully</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "id": 1,
+  "email": "john.doe@example.com",
+  "username": "johndoe",
+  "first_name": "John",
+  "last_name": "Doe",
+  "age": 25,
+  "gender": "M",
+  "phone_number": "+1-555-0100",
+  "address": "123 Main Street, New York, NY 10001",
+  "marital_status": "S",
+  "date_joined": "2024-02-10T08:30:00Z"
+}
+                        </div>
+
+                        <div class="code-label">Error Response - Missing Token (401)</div>
+                        <div class="response-error">
+                            <span class="status-code status-401">401</span>
+                            <strong>Authentication Credentials Not Provided</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "detail": "Authentication credentials were not provided."
+}
+                        </div>
+
+                        <div class="code-label">Error Response - Invalid Token (401)</div>
+                        <div class="response-error">
+                            <span class="status-code status-401">401</span>
+                            <strong>Invalid Token</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "detail": "Invalid token"
+}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ENDPOINT 5: GREETING ENDPOINT -->
+                <div class="section">
+                    <h3>5. Get Personalized Greeting (Age Eligibility Check)</h3>
+                    <div class="endpoint">
+                        <div class="endpoint-header">
+                            <span class="method get">GET</span>
+                            <span class="url">/api/auth/greeting/</span>
+                            <span class="auth-required">🔐 REQUIRES AUTH</span>
+                        </div>
+
+                        <h4>Description</h4>
+                        <p>Retrieve a personalized greeting with the authenticated user's information. Includes an age eligibility check. 
+                        Users must be 18+ to be eligible. This endpoint demonstrates dynamic response payloads based on user data.</p>
+
+                        <h4>Authentication Required</h4>
+                        <div class="warning">
+                            <strong>Authorization Header:</strong> 
+                            <div class="code-block" style="margin-top: 10px; background: #f8f9fa; color: #333; border: 1px solid #ffc107;">
+Authorization: Bearer &lt;your_access_token&gt;
+                            </div>
+                        </div>
+
+                        <div class="code-label">Request Example</div>
+                        <div class="code-block">
+GET /api/auth/greeting/
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Content-Type: application/json
+                        </div>
+
+                        <div class="code-label">Success Response - Eligible User (200 OK)</div>
+                        <div class="response-success">
+                            <span class="status-code status-200">200</span>
+                            <strong>User is eligible (18+ years old)</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "greetings": "Hello Mr. John Doe",
+  "legitimacy": "You are qualified to be a part of the ongoing event as you are old enough",
+  "age": 25,
+  "eligible": true,
+  "data": {
+    "id": 1,
+    "email": "john.doe@example.com",
+    "username": "johndoe",
+    "first_name": "John",
+    "last_name": "Doe",
+    "age": 25,
+    "gender": "M",
+    "phone_number": "+1-555-0100",
+    "address": "123 Main Street, New York, NY 10001",
+    "marital_status": "S"
+  }
+}
+                        </div>
+
+                        <div class="code-label">Success Response - Ineligible User (200 OK)</div>
+                        <div class="response-success">
+                            <span class="status-code status-200">200</span>
+                            <strong>User is ineligible (under 18 years old)</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "greetings": "Hello Ms. Sarah Johnson",
+  "legitimacy": "You are not qualified to be a part of the ongoing event as you are too young (age: 16)",
+  "age": 16,
+  "eligible": false,
+  "data": {
+    "id": 2,
+    "email": "sarah.johnson@example.com",
+    "username": "sarahjohnson",
+    "first_name": "Sarah",
+    "last_name": "Johnson",
+    "age": 16,
+    "gender": "F",
+    "phone_number": "+1-555-0200",
+    "address": "456 Oak Avenue, Los Angeles, CA 90001",
+    "marital_status": "S"
+  }
+}
+                        </div>
+
+                        <div class="code-label">Error Response - Missing Token (401)</div>
+                        <div class="response-error">
+                            <span class="status-code status-401">401</span>
+                            <strong>Unauthorized Access</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "detail": "Authentication credentials were not provided."
+}
+                        </div>
+
+                        <div class="code-label">Error Response - Expired Token (401)</div>
+                        <div class="response-error">
+                            <span class="status-code status-401">401</span>
+                            <strong>Token Expired</strong>
+                        </div>
+                        <div class="code-block">
+{
+  "detail": "Given token not valid for any token type"
+}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>HTTP Status Codes Reference</h3>
+                    <table>
+                        <tr>
+                            <th>Status Code</th>
+                            <th>Meaning</th>
+                            <th>Usage</th>
+                        </tr>
+                        <tr>
+                            <td><span class="status-code status-200">200</span></td>
+                            <td>OK</td>
+                            <td>Request successful (GET, POST, PUT)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="status-code status-201">201</span></td>
+                            <td>Created</td>
+                            <td>Resource successfully created (user registration)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="status-code status-400">400</span></td>
+                            <td>Bad Request</td>
+                            <td>Invalid request parameters or validation error</td>
+                        </tr>
+                        <tr>
+                            <td><span class="status-code status-401">401</span></td>
+                            <td>Unauthorized</td>
+                            <td>Missing or invalid authentication credentials</td>
+                        </tr>
+                        <tr>
+                            <td><span class="status-code status-404">404</span></td>
+                            <td>Not Found</td>
+                            <td>Resource does not exist (user not found)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="status-code status-500">500</span></td>
+                            <td>Server Error</td>
+                            <td>Internal server error</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <!-- IMPLEMENTATION TAB -->
+            <div id="implementation" class="tab-content">
+                <h2>🛠️ Step-by-Step Implementation Guide</h2>
+
+                <div class="section">
+                    <h3>Prerequisites</h3>
+                    <ul class="feature-list">
+                        <li>Python 3.8+</li>
+                        <li>Django 3.2+</li>
+                        <li>Django REST Framework</li>
+                        <li>djangorestframework-simplejwt</li>
+                    </ul>
+                </div>
+
+                <!-- STEP 1 -->
+                <div class="section">
+                    <div class="step-box">
+                        <h3><span class="step-number">1</span> Project Setup</h3>
+                        <p>Create a new Django project and app:</p>
+                        <div class="code-block">
+# Create project folder
+mkdir django_auth_project
+cd django_auth_project
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Create Django project
+django-admin startproject config .
+python manage.py startapp users
+
+# Install required packages
+pip install django
+pip install djangorestframework
+pip install djangorestframework-simplejwt
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 2 -->
+                <div class="section">
+                    <div class="step-box">
+                        <h3><span class="step-number">2</span> Configure Settings</h3>
+                        <p>Update <span class="highlight">settings.py</span> with required configurations:</p>
+                        <div class="code-block">
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'users',
+]
+
+# Custom User Model
+AUTH_USER_MODEL = 'users.CustomUser'
+
+# REST Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+# JWT Configuration
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 3 -->
+                <div class="section">
+                    <div class="step-box">
+                        <h3><span class="step-number">3</span> Create Custom User Model</h3>
+                        <p>Create the CustomUser model in <span class="highlight">users/models.py</span>:</p>
+                        <div class="code-block">
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.db import models
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('Email is required')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+    
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        return self.create_user(email, password, **extra_fields)
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    GENDER_CHOICES = [('M', 'Male'), ('F', 'Female'), ('O', 'Other')]
+    MARITAL_CHOICES = [('S', 'Single'), ('M', 'Married'), ('D', 'Divorced'), ('W', 'Widowed')]
+    
+    email = models.EmailField(unique=True)
+    username = models.CharField(max_length=100, unique=True)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    age = models.IntegerField()
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    phone_number = models.CharField(max_length=15)
+    address = models.TextField()
+    marital_status = models.CharField(max_length=1, choices=MARITAL_CHOICES)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    
+    objects = CustomUserManager()
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    
+    def __str__(self):
+        return self.email
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4 -->
+                <div class="section">
+                    <div class="step-box">
+                        <h3><span class="step-number">4</span> Create Serializers</h3>
+                        <p>Create <span class="highlight">users/serializers.py</span> with all required serializers:</p>
+                        <div class="code-block">
+from rest_framework import serializers
+from django.contrib.auth import authenticate
+from .models import CustomUser
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'email', 'username', 'first_name', 'last_name', 'age', 'gender', 'phone_number', 'address', 'marital_status']
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=8)
+    
+    class Meta:
+        model = CustomUser
+        fields = ['email', 'username', 'password', 'first_name', 'last_name', 'age', 'gender', 'phone_number', 'address', 'marital_status']
+    
+    def validate_age(self, value):
+        if value < 18:
+            raise serializers.ValidationError("User must be at least 18 years old")
+        return value
+    
+    def create(self, validated_data):
+        user = CustomUser.objects.create_user(**validated_data)
+        return user
+
+class UserLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+    
+    def validate(self, data):
+        email = data.get('email')
+        password = data.get('password')
+        
+        user = authenticate(username=email, password=password)
+        if not user:
+            raise serializers.ValidationError("Invalid email or password")
+        data['user'] = user
+        return data
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 5 -->
+                <div class="section">
+                    <div class="step-box">
+                        <h3><span class="step-number">5</span> Create Views</h3>
+                        <p>Create <span class="highlight">users/views.py</span> with API views:</p>
+                        <div class="code-block">
+from rest_framework import status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import UserSerializer, UserRegistrationSerializer, UserLoginSerializer
+
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        serializer = UserLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+                'user': UserSerializer(user).data
+            }, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class GreetingView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        gender_prefix = "Mr." if user.gender == 'M' else "Ms."
+        
+        eligible = user.age >= 18
+        message = f"You are qualified to be a part of the ongoing event"
+        if not eligible:
+            message = f"You are not qualified to be a part of the ongoing event as you are too young (age: {user.age})"
+        
+        return Response({
+            'greetings': f"Hello {gender_prefix} {user.first_name} {user.last_name}",
+            'legitimacy': message,
+            'age': user.age,
+            'eligible': eligible,
+            'data': UserSerializer(user).data
+        }, status=status.HTTP_200_OK)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 6 -->
+                <div class="section">
+                    <div class="step-box">
+                        <h3><span class="step-number">6</span> Create URL Routes</h3>
+                        <p>Create <span class="highlight">users/urls.py</span>:</p>
+                        <div class="code-block">
+from django.urls import path
+from rest_framework_simplejwt.views import TokenRefreshView
+from .views import RegisterView, LoginView, UserProfileView, GreetingView
+
+urlpatterns = [
+    path('register/', RegisterView.as_view(), name='register'),
+    path('login/', LoginView.as_view(), name='login'),
+    path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('profile/', UserProfileView.as_view(), name='profile'),
+    path('greeting/', GreetingView.as_view(), name='greeting'),
+]
+                        </div>
+                        <p style="margin-top: 15px;">Update main <span class="highlight">config/urls.py</span>:</p>
+                        <div class="code-block">
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/auth/', include('users.urls')),
+]
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 7 -->
+                <div class="section">
+                    <div class="step-box">
+                        <h3><span class="step-number">7</span> Register User Model with Admin</h3>
+                        <p>Update <span class="highlight">users/admin.py</span>:</p>
+                        <div class="code-block">
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .models import CustomUser
+
+@admin.register(CustomUser)
+class CustomUserAdmin(BaseUserAdmin):
+    list_display = ('email', 'username', 'first_name', 'last_name', 'age', 'is_active')
+    list_filter = ('is_active', 'gender', 'marital_status')
+    search_fields = ('email', 'username', 'first_name', 'last_name')
+    ordering = ('-date_joined',)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 8 -->
+                <div class="section">
+                    <div class="step-box">
+                        <h3><span class="step-number">8</span> Run Migrations & Test</h3>
+                        <div class="code-block">
+# Create migrations
+python manage.py makemigrations
+
+# Apply migrations
+python manage.py migrate
+
+# Create superuser
+python manage.py createsuperuser
+
+# Run development server
+python manage.py runserver
+
+# Now test endpoints at http://localhost:8000/api/auth/
+                        </div>
+                    </div>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Important Notes:</strong>
+                    <ul style="margin-top: 10px;">
+                        <li>Always use HTTPS in production for token transmission</li>
+                        <li>Store SECRET_KEY in environment variables, not in code</li>
+                        <li>Implement proper CORS settings for frontend integration</li>
+                        <li>Add rate limiting to protect against brute force attacks</li>
+                        <li>Use environment variables for sensitive configuration</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- GRADING TAB -->
+            <div id="grading" class="tab-content">
+                <h2>📊 Grading Criteria & Evaluation</h2>
+
+                <div class="section">
+                    <h3>Total Points: 100</h3>
+                </div>
+
+                <div class="grading-criteria">
+                    <div class="criteria-card">
+                        <h4>Custom User Model</h4>
+                        <p>Proper implementation of AbstractBaseUser with all required fields (email, username, first_name, last_name, age, gender, phone_number, address, marital_status)</p>
+                        <div class="points">15 points</div>
+                    </div>
+
+                    <div class="criteria-card">
+                        <h4>User Registration Endpoint</h4>
+                        <p>Working POST /api/auth/register/ with validation, password hashing, and error handling</p>
+                        <div class="points">15 points</div>
+                    </div>
+
+                    <div class="criteria-card">
+                        <h4>User Login & JWT Tokens</h4>
+                        <p>Working POST /api/auth/login/ that returns access and refresh tokens. Proper authentication</p>
+                        <div class="points">15 points</div>
+                    </div>
+
+                    <div class="criteria-card">
+                        <h4>Protected Routes</h4>
+                        <p>Properly secured endpoints that require JWT authentication (profile & greeting endpoints)</p>
+                        <div class="points">15 points</div>
+                    </div>
+
+                    <div class="criteria-card">
+                        <h4>Greeting Endpoint Logic</h4>
+                        <p>Correct implementation of personalized greeting with age eligibility check (18+)</p>
+                        <div class="points">15 points</div>
+                    </div>
+
+                    <div class="criteria-card">
+                        <h4>Serializers & Validation</h4>
+                        <p>Comprehensive serializers with proper validation, password field handling, and error messages</p>
+                        <div class="points">10 points</div>
+                    </div>
+
+                    <div class="criteria-card">
+                        <h4>Code Quality & Documentation</h4>
+                        <p>Clean, well-organized code with comments and docstrings. README documentation</p>
+                        <div class="points">10 points</div>
+                    </div>
+
+                    <div class="criteria-card">
+                        <h4>Error Handling & Edge Cases</h4>
+                        <p>Proper HTTP status codes, validation errors, and handling of edge cases</p>
+                        <div class="points">5 points</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Detailed Grading Breakdown</h3>
+
+                    <h4>1. Custom User Model (15 points)</h4>
+                    <div class="step-box">
+                        <ul class="feature-list">
+                            <li><strong>Extends AbstractBaseUser:</strong> (3 points) Must properly inherit from AbstractBaseUser and PermissionsMixin</li>
+                            <li><strong>All Required Fields:</strong> (8 points) All 9 fields correctly defined (email, username, first_name, last_name, age, gender, phone_number, address, marital_status)</li>
+                            <li><strong>Email as USERNAME_FIELD:</strong> (2 points) Email is set as the login identifier</li>
+                            <li><strong>Custom Manager:</strong> (2 points) CustomUserManager implements create_user and create_superuser</li>
+                        </ul>
+                    </div>
+
+                    <h4>2. User Registration (15 points)</h4>
+                    <div class="step-box">
+                        <ul class="feature-list">
+                            <li><strong>POST /api/auth/register/ Works:</strong> (5 points) Endpoint is accessible and creates users</li>
+                            <li><strong>Validation:</strong> (5 points) Proper validation of all fields, age check, unique email/username</li>
+                            <li><strong>Password Hashing:</strong> (3 points) Passwords are properly hashed using Django's password hasher</li>
+                            <li><strong>Response Format:</strong> (2 points) Returns user data in correct format</li>
+                        </ul>
+                    </div>
+
+                    <h4>3. User Login & JWT Tokens (15 points)</h4>
+                    <div class="step-box">
+                        <ul class="feature-list">
+                            <li><strong>POST /api/auth/login/ Works:</strong> (5 points) Login endpoint is functional</li>
+                            <li><strong>Token Generation:</strong> (5 points) Correctly generates access and refresh tokens</li>
+                            <li><strong>Credential Verification:</strong> (3 points) Properly verifies email and password</li>
+                            <li><strong>Response Format:</strong> (2 points) Returns tokens and user info correctly</li>
+                        </ul>
+                    </div>
+
+                    <h4>4. Protected Routes (15 points)</h4>
+                    <div class="step-box">
+                        <ul class="feature-list">
+                            <li><strong>JWT Authentication:</strong> (8 points) Uses SimpleJWT and requires Authorization header with Bearer token</li>
+                            <li><strong>Profile Endpoint:</strong> (4 points) GET /api/auth/profile/ returns current user data when authenticated</li>
+                            <li><strong>Unauthorized Response:</strong> (3 points) Returns 401 error when token is missing or invalid</li>
+                        </ul>
+                    </div>
+
+                    <h4>5. Greeting Endpoint Logic (15 points)</h4>
+                    <div class="step-box">
+                        <ul class="feature-list">
+                            <li><strong>Endpoint Works:</strong> (5 points) GET /api/auth/greeting/ is accessible with proper authentication</li>
+                            <li><strong>Greeting Message:</strong> (4 points) Generates correct personalized greeting with Mr./Ms. prefix based on gender</li>
+                            <li><strong>Age Check Logic:</strong> (4 points) Correctly checks if age >= 18 and returns appropriate eligibility message</li>
+                            <li><strong>Complete Payload:</strong> (2 points) Returns all required data including user information</li>
+                        </ul>
+                    </div>
+
+                    <h4>6. Serializers & Validation (10 points)</h4>
+                    <div class="step-box">
+                        <ul class="feature-list">
+                            <li><strong>UserSerializer:</strong> (3 points) Correctly serializes user data</li>
+                            <li><strong>RegistrationSerializer:</strong> (3 points) Handles registration with validation</li>
+                            <li><strong>Password Field:</strong> (2 points) Password is write-only and properly validated</li>
+                            <li><strong>Error Messages:</strong> (2 points) Clear, helpful error messages for validation failures</li>
+                        </ul>
+                    </div>
+
+                    <h4>7. Code Quality (10 points)</h4>
+                    <div class="step-box">
+                        <ul class="feature-list">
+                            <li><strong>Code Organization:</strong> (4 points) Well-structured, logical file organization</li>
+                            <li><strong>Comments & Docstrings:</strong> (3 points) Adequate documentation of code</li>
+                            <li><strong>README Documentation:</strong> (2 points) Clear setup and usage instructions</li>
+                            <li><strong>No Code Duplication:</strong> (1 point) DRY principles followed</li>
+                        </ul>
+                    </div>
+
+                    <h4>8. Error Handling (5 points)</h4>
+                    <div class="step-box">
+                        <ul class="feature-list">
+                            <li><strong>HTTP Status Codes:</strong> (2 points) Correct status codes (200, 201, 400, 401, 404)</li>
+                            <li><strong>Edge Cases:</strong> (2 points) Handles duplicate emails, invalid ages, missing fields</li>
+                            <li><strong>Error Messages:</strong> (1 point) User-friendly error responses</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Bonus Features (up to +10 points)</h3>
+                    <div class="step-box">
+                        <ul class="feature-list">
+                            <li><strong>Token Blacklisting (+2):</strong> Implement logout by blacklisting tokens</li>
+                            <li><strong>Email Verification (+2):</strong> Send confirmation email on registration</li>
+                            <li><strong>Password Reset (+2):</strong> Implement forgot password functionality</li>
+                            <li><strong>User Update (+1):</strong> Allow users to update their profile</li>
+                            <li><strong>User Search Admin (+1):</strong> Implement admin search functionality</li>
+                            <li><strong>Rate Limiting (+2):</strong> Implement rate limiting on login attempts</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Common Mistakes to Avoid</h3>
+                    <div class="warning">
+                        <ul style="margin-top: 10px;">
+                            <li>❌ Not setting AUTH_USER_MODEL in settings.py</li>
+                            <li>❌ Returning password field in responses (should be write-only)</li>
+                            <li>❌ Not implementing proper permission classes on views</li>
+                            <li>❌ Missing validation for age >= 18</li>
+                            <li>❌ Not using proper password hashing in create_user</li>
+                            <li>❌ Incorrect JWT token configuration</li>
+                            <li>❌ Not handling edge cases in serializers</li>
+                            <li>❌ Poor error messages or missing HTTP status codes</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Testing Your Implementation</h3>
+                    <div class="step-box">
+                        <h4>Recommended Testing Order:</h4>
+                        <ol style="margin-left: 20px;">
+                            <li>Test user registration with valid data</li>
+                            <li>Test user registration validation errors (age < 18, duplicate email)</li>
+                            <li>Test user login with correct credentials</li>
+                            <li>Test login with incorrect password</li>
+                            <li>Test profile endpoint with valid token</li>
+                            <li>Test profile endpoint without token (should get 401)</li>
+                            <li>Test greeting endpoint with eligible user (age >= 18)</li>
+                            <li>Test greeting endpoint with ineligible user (age < 18)</li>
+                            <li>Test token refresh functionality</li>
+                            <li>Test with expired token</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3>Submission Checklist</h3>
+                    <div class="success-msg">
+                        <ul style="margin-top: 10px;">
+                            <li>✓ All endpoints implemented and working</li>
+                            <li>✓ Custom user model with all required fields</li>
+                            <li>✓ Serializers with proper validation</li>
+                            <li>✓ JWT authentication configured</li>
+                            <li>✓ Protected routes working correctly</li>
+                            <li>✓ Greeting endpoint with age logic</li>
+                            <li>✓ Proper error handling and status codes</li>
+                            <li>✓ Code is well-documented</li>
+                            <li>✓ README with setup instructions</li>
+                            <li>✓ Tested all endpoints manually</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2024 Django User Authentication System - Task Documentation</p>
+            <p>Version 1.0 | Last Updated: February 2024</p>
+        </footer>
+    </div>
+
+    <script>
+        function switchTab(evt, tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Remove active class from all buttons
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => button.classList.remove('active'));
+
+            // Show the selected tab
+            const selectedTab = document.getElementById(tabName);
+            if (selectedTab) {
+                selectedTab.classList.add('active');
+            }
+
+            // Add active class to clicked button
+            evt.currentTarget.classList.add('active');
+        }
+
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
